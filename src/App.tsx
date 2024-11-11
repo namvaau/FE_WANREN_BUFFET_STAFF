@@ -1,26 +1,37 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import Header from './layout/staff/component/Header';
+import Sidebar from './layout/staff/component/Sidebar';
+import MainContent from './layout/staff/component/MainContent';
+import TableModal from './layout/staff/component/TableModal';
+import OrderOnTable from './layout/staff/component/orderOnTable/orderOnTable';
 
-function App() {
+type ContentType = 'home' | '2nd_floor' | 'gdeli' | 'setting';
+
+const App: React.FC = () => {
+  const [selectedContent, setSelectedContent] = useState<ContentType>('home');
+
+  const handleSidebarClick = (contentType: ContentType) => {
+    setSelectedContent(contentType);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div>
+        <Header toggleId="header-toggle" />
+        <Sidebar toggleId="header-toggle" onClickContent={handleSidebarClick} />
+        
+        <Routes>
+          <Route path="/" element={<MainContent content={selectedContent} />} />
+          <Route path="/orderOnTable/:tableId" element={<OrderOnTable />} />
+        </Routes> 
+
+        <TableModal />
+      </div>
+    </Router>
   );
-}
+};
 
 export default App;
