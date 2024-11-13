@@ -71,7 +71,11 @@ const TableModal: React.FC<{
   );
 };
 
-const TableList: React.FC = () => {
+interface TableListProps {
+  area: 'home' | '2nd_floor';
+}
+
+const TableList: React.FC<TableListProps> = ({ area }) => {
   const [tables, setTables] = useState<Tables[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedTable, setSelectedTable] = useState<Tables | null>(null);
@@ -81,7 +85,7 @@ const TableList: React.FC = () => {
   useEffect(() => {
     const fetchTables = async () => {
       try {
-        const response = await fetch('http://localhost:8080/Table');
+        const response = await fetch('http://localhost:8080/Table?page=0&size=50');
         const data = await response.json();
         if (data && data._embedded && data._embedded.tablees) {
           setTables(data._embedded.tablees);
@@ -97,6 +101,12 @@ const TableList: React.FC = () => {
 
     fetchTables();
   }, []);
+
+  const filteredTables = tables.filter((table) => {
+    if (area === 'home') return table.tableNumber <= 25;
+    if (area === '2nd_floor') return table.tableNumber > 25 && table.tableNumber <= 50;
+    return true;
+  });
 
   const handleTableClick = (table: Tables) => {
     if (table.tableStatus === 'EMPTY_TABLE') {
@@ -125,8 +135,8 @@ const TableList: React.FC = () => {
 
   return (
     <div className="row" style={{ paddingLeft: '20px', width: '100%' }}>
-      {tables.length > 0 ? (
-        tables.map((table) => (
+      {filteredTables.length > 0 ? (
+        filteredTables.map((table) => (
           <div className="col-md-3" key={table.tableId} onClick={() => handleTableClick(table)}>
             <div className={`card table-card ${table.tableStatus === 'EMPTY_TABLE' ? '' : 'table-card-active'}`}>
               <div className="card-body">
@@ -134,8 +144,7 @@ const TableList: React.FC = () => {
                 {table.tableStatus !== 'EMPTY_TABLE' && (
                   <>
                     <p className="table-status">2h14'</p>
-                    <p className="total-amount">825,570đ</p>
-                    <a href="#" className="btn btn-danger rounder-0">Thanh toán</a>
+                    <p  className="btn btn-danger rounder-0 mt-4">Thanh toán</p>
                   </>
                 )}
               </div>
