@@ -1,30 +1,14 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import avarta from '../assets/img/Cream and Black Simple Illustration Catering Logo.png'
 
 interface SidebarProps {
-  toggleId: string;
   onClickContent: (contentType: 'home' | '2nd_floor' | 'gdeli' | 'setting') => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ toggleId, onClickContent }) => {
-  const sidebarRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const toggle = document.getElementById(toggleId);
-    if (toggle) {
-      toggle.addEventListener('click', () => {
-        sidebarRef.current?.classList.toggle('show-sidebar');
-      });
-    }
-    return () => {
-      if (toggle) {
-        toggle.removeEventListener('click', () => {});
-      }
-    };
-  }, [toggleId]);
+const Sidebar: React.FC<SidebarProps> = ({  onClickContent }) => {
 
   return (
-    <nav className="sidebar" ref={sidebarRef} id="sidebar">
+    <nav className="sidebar" id="sidebar">
       <div className="sidebar__container">
         <div className="sidebar__user">
           <div className="sidebar__img">

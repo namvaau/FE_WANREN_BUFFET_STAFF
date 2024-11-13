@@ -8,8 +8,8 @@ interface MainContentProps {
 const MainContent: React.FC<MainContentProps> = ({ content }) => {
   return (
     <main className="main main-content" id='main'>
-      {content === 'home' && <TableList />}
-      {content === '2nd_floor' && <h1 style={{paddingLeft: '20px'}}>Welcome to Tầng 2</h1>}
+     {content === 'home' && <TableList area="home" />}
+     {content === '2nd_floor' && <TableList area="2nd_floor" />}
       {content === 'gdeli' && <h1>Welcome to G-Deli</h1>}
       {content === 'setting' && <h1>Cài Đặt</h1>}
     </main>
