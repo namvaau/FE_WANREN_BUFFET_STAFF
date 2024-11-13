@@ -1,17 +1,49 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../assets/css/checkout_for_staff.css";
-import orderForStaffService from "../../../api/orderForStaffApi";
+import { getAllOrderDetailsByOrderId, getOrderDetailWithNameProduct, getTableNumberByOrderId } from "../../../api/orderForStaffApi";
+import OrderDetailModel from "../../../models/OrderDetaitModel";
+import OrderDetailsWithNameProduct from "../../../models/OrderDetailsWithNameProduct";
 
 const Checkout1: React.FC = () => {
-    const [orderId, setOrderId] = useState<string | null>(localStorage.getItem('orderId'));
-    const [orderTableNum, setOrderTableNum] = useState<string | null>('');
-    const [orderDetails, setOrderDetails] = useState<[]>()
-    const getOrderDetail = async (id: any) => {
-        const orderDetailsResponse = await orderForStaffService.getAllOrderDetailsByOrderId(id);
-        setOrderDetails(orderDetailsResponse?.data);
-        const orderTableNumResponse = await orderForStaffService.getTableNumberByOrderId(id);
-        setOrderTableNum(orderTableNumResponse)
-    }
+    // const [orderId, setOrderId] = useState(localStorage.getItem('orderId'));
+    const [orderId, setOrderId] = useState(2);
+    const [loading1, setLoading1] = useState<boolean>(true);
+    const [loading2, setLoading2] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    const [orderTableNum, setOrderTableNum] = useState<number>(0);
+    const [orderDetails, setOrderDetails] = useState<OrderDetailsWithNameProduct[]>([]);
+
+    useEffect(() => {
+        const loadOrderDetails = async () => {
+            setLoading1(true);
+            try {
+                const fetchedOrderDetails = await getOrderDetailWithNameProduct(orderId);
+                setOrderDetails(fetchedOrderDetails);
+            } catch (err) {
+                const errorMessage = err instanceof Error ? err.message : 'Failed to fetch orderDetails';
+                setError(errorMessage);
+            } finally {
+                setLoading1(false);
+            }
+        };
+
+        const loadTableNum = async () => {
+            setLoading2(true);
+            try {
+                const fetchedTableNum = await getTableNumberByOrderId(orderId);
+                setOrderTableNum(fetchedTableNum);
+            } catch (err) {
+                const errorMessage = err instanceof Error ? err.message : 'Failed to fetch tablenumber';
+                setError(errorMessage);
+            } finally {
+                setLoading2(false);
+            }
+        };
+
+        
+        loadTableNum();
+        loadOrderDetails();
+    }, []);
 
     return(
         <div className="ps36231-checkout-staff-1">
@@ -30,7 +62,7 @@ const Checkout1: React.FC = () => {
         </div>
         <div>
             <div>
-                <h2 className="title-table">Bàn 18 | Xác nhận kiểm đồ</h2>
+                <h2 className="title-table">Bàn số {orderTableNum} | Xác nhận kiểm đồ</h2>
             </div>
             <div className="container-table">
                 <div>
@@ -39,46 +71,12 @@ const Checkout1: React.FC = () => {
                             <th>Tên món</th>
                             <th>Số lượng</th>
                         </thead>
-                        <tr>
-                            <td>Suất Buffet Tiêu Chuẩn_NL (C)</td>
-                            <td>1.0</td>
-                        </tr>
-                        <tr>
-                            <td>Khăn lạnh</td>
-                            <td>2.0</td>
-                        </tr>
-                        <tr>
-                            <td>Suất Buffet nước ngọt</td>
-                            <td>1.0</td>
-                        </tr>
-                        <tr>
-                            <td>Suất Buffet nước ngọt</td>
-                            <td>1.0</td>
-                        </tr>
-                        <tr>
-                            <td>Suất Buffet nước ngọt</td>
-                            <td>1.0</td>
-                        </tr>
-                        <tr>
-                            <td>Suất Buffet nước ngọt</td>
-                            <td>1.0</td>
-                        </tr>
-                        <tr>
-                            <td>Suất Buffet nước ngọt</td>
-                            <td>1.0</td>
-                        </tr>
-                        <tr>
-                            <td>Suất Buffet nước ngọt</td>
-                            <td>1.0</td>
-                        </tr>
-                        <tr>
-                            <td>Suất Buffet nước ngọt</td>
-                            <td>1.0</td>
-                        </tr>
-                        <tr>
-                            <td>Suất Buffet nước ngọt</td>
-                            <td>1.0</td>
-                        </tr>
+                        {orderDetails.map((orderDetail, index) => (
+                            <tr key={index}>
+                                <td>{orderDetail.productName}</td>
+                                <td>{orderDetail.quantity}</td>
+                            </tr>
+                        ))}
                     </table>
                 </div>
             </div>
