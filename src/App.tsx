@@ -7,6 +7,9 @@ import Sidebar from './layout/staff/component/Sidebar';
 import MainContent from './layout/staff/component/MainContent';
 import TableModal from './layout/staff/component/TableModal';
 import OrderOnTable from './layout/staff/component/orderOnTable/orderOnTable';
+import Checkout1 from './layout/staff/component/Checkout1';
+import Checkout2 from './layout/staff/component/Checkout2';
+import Checkout3 from './layout/staff/component/Checkout3';
 
 type ContentType = 'home' | '2nd_floor' | 'gdeli' | 'setting';
 
@@ -26,6 +29,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<MainContent content={selectedContent} />} />
           <Route path="/orderOnTable/:tableId" element={<OrderOnTable />} />
+          <Route path='/checkout/1' element={<Checkout1 />}/>
         </Routes> 
 
         <TableModal />
