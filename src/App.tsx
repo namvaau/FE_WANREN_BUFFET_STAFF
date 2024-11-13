@@ -21,7 +21,7 @@ const App: React.FC = () => {
     <Router>
       <div>
         <Header toggleId="header-toggle" />
-        <Sidebar toggleId="header-toggle" onClickContent={handleSidebarClick} />
+        <Sidebar onClickContent={handleSidebarClick} />
         
         <Routes>
           <Route path="/" element={<MainContent content={selectedContent} />} />

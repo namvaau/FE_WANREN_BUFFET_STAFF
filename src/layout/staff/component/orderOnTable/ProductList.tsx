@@ -22,7 +22,6 @@ const ProductList: React.FC<ProductListProps> = ({ category, cartItems, setCartI
             setLoading(true);
             try {
                 const fetchedProducts = await fetchProductsByCategory(category);
-                console.log(fetchedProducts)
                 setProducts(fetchedProducts);
             } catch (err) {
                 const errorMessage = err instanceof Error ? err.message : 'Failed to fetch products';
@@ -47,44 +46,70 @@ const ProductList: React.FC<ProductListProps> = ({ category, cartItems, setCartI
         totalPrice: number;
     }) => {
         setCartItems((prevItems) => {
-            // Tìm sản phẩm với cùng `productId` và `note`
             const itemExists = prevItems.find(
                 (cartItem) =>
                     cartItem.product.productId === item.product.productId &&
                     cartItem.note === item.note
             );
-    
+
             if (itemExists) {
-                // Nếu sản phẩm và note giống nhau, tăng số lượng và cập nhật tổng giá
                 return prevItems.map((cartItem) =>
                     cartItem.product.productId === item.product.productId &&
-                    cartItem.note === item.note
+                        cartItem.note === item.note
                         ? {
-                              ...cartItem,
-                              quantity: cartItem.quantity + item.quantity,
-                              totalPrice: cartItem.totalPrice + item.totalPrice,
-                          }
+                            ...cartItem,
+                            quantity: cartItem.quantity + item.quantity,
+                            totalPrice: cartItem.totalPrice + item.totalPrice,
+                        }
                         : cartItem
                 );
             }
-    
-            // Nếu sản phẩm với `note` khác nhau, thêm mục mới vào giỏ hàng
+
             return [...prevItems, item];
         });
-    
-        // Đóng modal sau khi thêm vào giỏ hàng
         setShowModal(false);
-    
-        // Log hành động vào console để kiểm tra
-        console.log(
-            `Product ${item.product.productId} added to cart with quantity ${item.quantity}, note: ${item.note}`
-        );
     };
-    
 
     const handleCloseModal = () => {
         setShowModal(false);
         setSelectedProduct(null);
+    };
+
+    const incrementQuantity = (productId: number, note: string) => {
+        setCartItems((prevItems) =>
+            prevItems.map((cartItem) =>
+                cartItem.product.productId === productId && cartItem.note === note
+                    ? {
+                        ...cartItem,
+                        quantity: cartItem.quantity + 1,
+                        totalPrice: cartItem.totalPrice + cartItem.product.price,
+                    }
+                    : cartItem
+            )
+        );
+    };
+
+    const decrementQuantity = (productId: number, note: string) => {
+        setCartItems((prevItems) =>
+            prevItems
+                .map((item) =>
+                    item.product.productId === productId && item.note === note
+                        ? {
+                            ...item,
+                            quantity: item.quantity - 1,
+                            totalPrice: item.totalPrice - item.product.price
+                        }
+                        : item
+                )
+                .filter((item) => item.quantity > 0) // Remove items with zero quantity
+        );
+    };
+
+    // Calculate total cart quantity for a product, including all notes
+    const getTotalProductQuantity = (productId: number) => {
+        return cartItems
+            .filter((item) => item.product.productId === productId)
+            .reduce((total, item) => total + item.quantity, 0);
     };
 
     if (loading) {
@@ -103,21 +128,29 @@ const ProductList: React.FC<ProductListProps> = ({ category, cartItems, setCartI
         <div style={{ margin: '0 18px 18px 18px' }}>
             <div className="content-section">
                 <div className="row g-4 mb-5">
-                    {products.map((product) => (
-                        <ProductCard
-                            key={product.productId}
-                            productId={product.productId}
-                            productName={product.productName}
-                            image={product.image}
-                            price={product.price}
-                            description={product.description || 'No description available'}
-                            typeFood={product.typeFood || 'Unknown'}
-                            productStatus={product.productStatus || 'Unavailable'}
-                            quantity={product.quantity || 0}
-                            category={product.category}
-                            onImageClick={() => handleImageClick(product)}
-                        />
-                    ))}
+                    {products.map((product) => {
+                        const totalProductQuantity = getTotalProductQuantity(product.productId); // Get the total quantity for this product
+                        return (
+                            <ProductCard
+                                onAddToCart={handleAddToCart}
+                                product={product}
+                                cartQuantity={totalProductQuantity} // Pass total quantity for this product
+                                onImageClick={() => handleImageClick(product)}
+                                incrementQuantity={() => {
+                                    const cartItem = cartItems.find((item) => item.product.productId === product.productId);
+                                    if (cartItem) {
+                                        incrementQuantity(product.productId, cartItem.note);
+                                    }
+                                }}
+                                decrementQuantity={() => {
+                                    const cartItem = cartItems.find((item) => item.product.productId === product.productId);
+                                    if (cartItem) {
+                                        decrementQuantity(product.productId, cartItem.note);
+                                    }
+                                }}
+                            />
+                        );
+                    })}
                 </div>
             </div>
             {showModal && selectedProduct && (

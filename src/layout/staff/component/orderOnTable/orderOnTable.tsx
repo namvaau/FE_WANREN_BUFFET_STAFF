@@ -6,7 +6,6 @@ import MainContent from './MainContent';
 import ExitModal from './ExitModal';
 import SwitchTableModal from './SwitchTableModal';
 import OffcanvasCart from './OffcanvasCart';
-import ProductList from './ProductList'; // Import ProductList
 import ProductModel from '../../../../models/ProductModel';
 
 type ContentType =
@@ -33,6 +32,10 @@ const OrderOnTable: React.FC = () => {
     const [showCart, setShowCart] = useState(false);
     const [selectedItemsSubtotal, setSelectedItemsSubtotal] = useState(0);
     const [cartItems, setCartItems] = useState<{ product: ProductModel; quantity: number; note: string; totalPrice: number }[]>([]);
+
+    const getTotalQuantity = () => {
+        return cartItems.reduce((total, item) => total + item.quantity, 0);
+    };
 
     const handleCartClick = () => setShowCart(true);
     const handleCloseCart = () => setShowCart(false);
@@ -75,22 +78,22 @@ const OrderOnTable: React.FC = () => {
 
     const handleUpdateSubtotal = (subtotal: number) => {
         setSelectedItemsSubtotal(subtotal);
-      };
-    
+    };
+
 
     return (
         <div>
-            <Header onCartClick={handleCartClick} selectedItemsSubtotal={selectedItemsSubtotal}/>
+            <Header onCartClick={handleCartClick} selectedItemsSubtotal={selectedItemsSubtotal} totalCartQuantity={getTotalQuantity()} />
             <OffcanvasCart onUpdateSubtotal={handleUpdateSubtotal} show={showCart} onHide={handleCloseCart} cartItems={cartItems} onConfirmOrder={handleConfirmOrder} onUpdateQuantity={(productId, newQuantity) => {
-          setCartItems((prevItems) =>
-            prevItems.map((item) =>
-              item.product.productId === productId ? { ...item, quantity: newQuantity } : item
-            )
-          );
-        }}
-        onRemoveItem={(productId) => {
-          setCartItems((prevItems) => prevItems.filter((item) => item.product.productId !== productId));
-        }}/>
+                setCartItems((prevItems) =>
+                    prevItems.map((item) =>
+                        item.product.productId === productId ? { ...item, quantity: newQuantity } : item
+                    )
+                );
+            }}
+                onRemoveItem={(productId) => {
+                    setCartItems((prevItems) => prevItems.filter((item) => item.product.productId !== productId));
+                }} />
             <Sidebar
                 toggleId="header-toggle"
                 onClickContent={handleSidebarClick}
