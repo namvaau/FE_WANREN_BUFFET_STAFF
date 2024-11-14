@@ -92,6 +92,16 @@
     border-radius: 3px;
 }
 
+.ps36231-checkout-staff-1 .container-button > button{
+    padding: 10px;
+    background-color: orange;
+    width: 200px;
+    text-align: center;
+    text-decoration: none;
+    color: black;
+    font-size: 20px;
+    border-radius: 3px; 
+}
 .ps36231-checkout-staff-1 .step-checkout{
     background-color: rgb(180, 180, 180);
     position: fixed;
@@ -198,6 +208,11 @@
     overflow: hidden;
     border-radius: 10px;
     border: 2px solid grey;
+    cursor: pointer;
+}
+
+.ps36231-checkout-staff-1 .container-method-checkout .all-div-method-payment > .selected{
+    border: 2px solid blue;
 }
 
 .ps36231-checkout-staff-1 .container-method-checkout .all-div-method-payment > div > .control-img{

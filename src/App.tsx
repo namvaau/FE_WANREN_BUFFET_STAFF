@@ -30,6 +30,8 @@ const App: React.FC = () => {
           <Route path="/" element={<MainContent content={selectedContent} />} />
           <Route path="/orderOnTable/:tableId" element={<OrderOnTable />} />
           <Route path='/checkout/1' element={<Checkout1 />}/>
+          <Route path='/checkout/2' element={<Checkout2 />}/>
+          <Route path='/checkout/3' element={<Checkout3 />}/>
         </Routes> 
 
         <TableModal />

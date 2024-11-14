@@ -1,7 +1,105 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../assets/css/checkout_for_staff.css";
+import OrderDetailsWithNameProduct from "../../../models/OrderDetailsWithNameProduct";
+import { getOrderAmount, getOrderDetailWithNameProduct, updateTotalAmount } from "../../../api/orderForStaffApi";
+import PaymentForStaffModel from "../../../models/PaymentForStaffModel";
+import { createPaymentNormal } from "../../../api/paymentForStaffApi";
 
 const Checkout3: React.FC = () => {
+    const [orderId, setOrderId] = useState(14);
+    const [error, setError] = useState<string | null>(null);
+    const [amount, setAmount] = useState<number>(0);
+    const [vat, setVat] = useState<number>(0);
+    const [lastAmount, setLastAmount] = useState<number>(0);
+    const [choicePayment, setChoicePayment] = useState<string | undefined>(undefined);
+    const [orderDetails, setOrderDetails] = useState<OrderDetailsWithNameProduct[]>([]);
+
+    const styleOfA:React.CSSProperties = {
+        cursor: "pointer",
+        color: "black"
+    }
+
+    useEffect(() => {
+        const loadOrderDetails = async () => {
+            try {
+                const fetchedOrderDetails = await getOrderDetailWithNameProduct(orderId);
+                setOrderDetails(fetchedOrderDetails);
+            } catch (err) {
+                const errorMessage = err instanceof Error ? err.message : 'Failed to fetch orderDetails';
+                setError(errorMessage);
+            }
+        };
+
+        const getAmount = async () =>{
+            try {
+                const amountOfRs = await getOrderAmount(orderId);
+                setAmount(amountOfRs);
+                setVat((amountOfRs * 0.08));
+                setLastAmount(amountOfRs - (amountOfRs * 0.08));
+            } catch (err) {
+                const errorMessage = err instanceof Error ? err.message : 'Failed to get amount';
+                setError(errorMessage);
+            }
+        }
+
+        getAmount();
+        loadOrderDetails();
+    }, []);
+
+    const choiceClick = (event: React.MouseEvent<HTMLDivElement>) =>{
+        const divId = event.currentTarget.dataset.id;
+        setChoicePayment(divId);
+    }
+
+    const updateAmount = async (order_id:number, total_amount:number) =>{
+        try {
+            const amountOfRs = await updateTotalAmount(order_id, total_amount);
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to update amount';
+            console.log(errorMessage);
+        }
+    }
+
+    const createPayment = async () =>{
+        try {
+            const newOrderResponse = await fetch('http://localhost:8080/api/payment/create_payment/normal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amountPaid: lastAmount,
+                    paymentMethod: "CASH",
+                    paymentStatus: false,
+                    orderId: orderId,
+                    userId: 4
+                })
+            });
+        } catch (error) {
+            console.log(error, "Cannot creat payment");
+        }
+    }
+
+    const checkoutClick = async() => {
+        try {
+            if(choicePayment === "3"){
+                // const payment = new PaymentForStaffModel(
+                //     lastAmount, //amountPaid
+                //     "CASH", //paymentMethod
+                //     false, //paymentStatus
+                //     orderId, //orderId
+                //     4 //userId
+                // );
+
+                updateAmount(orderId, lastAmount);
+
+                createPayment();
+
+                alert("Thanh toán thành công!");
+            }
+        } catch (error) {
+            console.error("Cannot checkout");
+        }
+    };
+
     return(
         <div className="ps36231-checkout-staff-1">
         <div className="call-staff">
@@ -21,37 +119,19 @@ const Checkout3: React.FC = () => {
             <div className="container-table">
                 <div>
                     <table className="all-sp">
-                        <tr>
-                            <td>1.0 x Suất Buffet Tiêu Chuẩn_NL (C)</td>
-                            <td>329.000 đ</td>
-                        </tr>
-                        <tr>
-                            <td>2.0 x Khăn lạnh</td>
-                            <td>5.000 đ</td>
-                        </tr>
-                        <tr>
-                            <td>1.0 x Suất Buffet nước ngọt</td>
-                            <td>45.000 đ</td>
-                        </tr>
-                        <tr>
-                            <td>1.0 x Suất Buffet nước ngọt</td>
-                            <td>45.000 đ</td>
-                        </tr>
-                        <tr>
-                            <td>1.0 x Suất Buffet nước ngọt</td>
-                            <td>45.000 đ</td>
-                        </tr>
-                        <tr>
-                            <td>1.0 x Suất Buffet nước ngọt</td>
-                            <td>45.000 đ</td>
-                        </tr>
+                        {orderDetails.map((orderDetail, index) => (
+                            <tr key={index}>
+                                <td>{orderDetail.quantity + " x " + orderDetail.productName}</td>
+                                <td>{orderDetail.price + " đ"}</td>
+                            </tr>
+                        ))}
                         <tr>
                             <td>Tổng tiền hàng</td>
-                            <td>384.000 đ</td>
+                            <td>{amount + " đ"}</td>
                         </tr>
                         <tr>
                             <td>VAT</td>
-                            <td>34.000 đ</td>
+                            <td>{vat + " đ"}</td>
                         </tr>
                     </table>
                 </div>
@@ -61,7 +141,7 @@ const Checkout3: React.FC = () => {
                     <table className="price-all-sp">
                         <thead>
                             <th>Tổng tiền cần thanh toán</th>
-                            <th>412420 đ</th>
+                            <th>{lastAmount + " đ"}</th>
                         </thead>
                     </table>
                 </div>
@@ -73,17 +153,17 @@ const Checkout3: React.FC = () => {
                         <h3>Tất cả các hình thức thanh toán</h3>
                     </div>
                     <div className="all-div-method-payment">
-                        <div>   
+                        <div data-id="1" onClick={choiceClick} className={choicePayment === '1' ? 'selected' : ''}>   
                             <div className="control-img">
                                 <img src="https://developers.momo.vn/v3/assets/images/icon-52bd5808cecdb1970e1aeec3c31a3ee1.png" alt=""/>
                             </div>
                         </div>
-                        <div>   
+                        <div data-id="2" onClick={choiceClick} className={choicePayment === '2' ? 'selected' : ''}>   
                             <div className="control-img">
                                 <img src="https://vinadesign.vn/uploads/images/2023/05/vnpay-logo-vinadesign-25-12-57-55.jpg" alt=""/>
                             </div>
                         </div>
-                        <div>   
+                        <div data-id="3" onClick={choiceClick} className={choicePayment === '3' ? 'selected' : ''}>   
                             <div className="control-img">
                                 <img src="https://static.vecteezy.com/system/resources/previews/004/309/804/non_2x/stack-bills-money-cash-isolated-icon-free-vector.jpg" alt=""/>
                             </div>
@@ -92,14 +172,14 @@ const Checkout3: React.FC = () => {
                 </div>
             </div>
             <div className="container-button">
-                <a href="">Tiếp tục</a>
+                <a style={styleOfA} onClick={checkoutClick}>Thanh toán</a>
             </div>
         </div>
         <div className="step-checkout">
             <div>
-                <a href="checkout_for_staff_1.html">1</a>
-                <a href="checkout_for_staff_2.html">2</a>
-                <a href="checkout_for_staff_3.html">3</a>
+                <a href="/checkout/1">1</a>
+                <a href="/checkout/2">2</a>
+                <a href="/checkout/3">3</a>
             </div>
         </div>
     </div>

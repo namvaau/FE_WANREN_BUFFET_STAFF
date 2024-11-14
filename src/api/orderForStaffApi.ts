@@ -62,3 +62,36 @@ export async function getOrderDetailWithNameProduct(orderId: number): Promise<Or
         return [];
     }
 }
+
+export async function getOrderAmount(orderId: number): Promise<number>{
+    try {
+        const amountOfOrder = await request(`http://localhost:8080/api/order_staff/get_amount/${orderId}`);
+        return amountOfOrder.amount;   
+    } catch (error) {
+        console.log(error, "Cannot get amount of order");
+        return 0;
+    }
+}
+
+export async function updateLoyaltyPoint(phoneNumber:string, amount:number): Promise<string> {
+    try {
+        const loyaltyPoint = await axios.put(`http://localhost:8080/api/customer/loyal_point/${phoneNumber}/${amount}`);
+        const rs = await loyaltyPoint.data;
+        const message = rs.message;
+        return message;
+    } catch (error) {
+        console.log(error, "Cannot accumulate points");
+        return "Không thể thực hiện tích điểm";
+    }
+}
+
+export async function updateTotalAmount(orderId: number, total_amount:number): Promise<number>{
+    try {
+        const response = await axios.put(`http://localhost:8080/api/order_staff/update/total_amount/${orderId}/${total_amount}`);
+        const data = response.data;
+        return data.amount_last;
+    } catch (error) {
+        console.error(error, "Cannot update total amount");
+        return 0;
+    }
+}
