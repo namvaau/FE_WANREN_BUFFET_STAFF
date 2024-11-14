@@ -80,7 +80,18 @@ export async function updateLoyaltyPoint(phoneNumber:string, amount:number): Pro
         const message = rs.message;
         return message;
     } catch (error) {
-        console.log(error, "Không thể thực hiện tích điểm");
+        console.log(error, "Cannot accumulate points");
         return "Không thể thực hiện tích điểm";
+    }
+}
+
+export async function updateTotalAmount(orderId: number, total_amount:number): Promise<number>{
+    try {
+        const response = await axios.put(`http://localhost:8080/api/order_staff/update/total_amount/${orderId}/${total_amount}`);
+        const data = response.data;
+        return data.amount_last;
+    } catch (error) {
+        console.error(error, "Cannot update total amount");
+        return 0;
     }
 }

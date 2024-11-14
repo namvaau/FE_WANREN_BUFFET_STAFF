@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "../assets/css/checkout_for_staff.css";
 import OrderDetailsWithNameProduct from "../../../models/OrderDetailsWithNameProduct";
-import { getOrderAmount, getOrderDetailWithNameProduct } from "../../../api/orderForStaffApi";
+import { getOrderAmount, getOrderDetailWithNameProduct, updateTotalAmount } from "../../../api/orderForStaffApi";
+import PaymentForStaffModel from "../../../models/PaymentForStaffModel";
+import { createPaymentNormal } from "../../../api/paymentForStaffApi";
 
 const Checkout3: React.FC = () => {
-    const [orderId, setOrderId] = useState(2);
+    const [orderId, setOrderId] = useState(14);
     const [error, setError] = useState<string | null>(null);
     const [amount, setAmount] = useState<number>(0);
     const [vat, setVat] = useState<number>(0);
@@ -12,8 +14,9 @@ const Checkout3: React.FC = () => {
     const [choicePayment, setChoicePayment] = useState<string | undefined>(undefined);
     const [orderDetails, setOrderDetails] = useState<OrderDetailsWithNameProduct[]>([]);
 
-    const borderStyle:React.CSSProperties = {
-        border: "2px solid blue"
+    const styleOfA:React.CSSProperties = {
+        cursor: "pointer",
+        color: "black"
     }
 
     useEffect(() => {
@@ -31,8 +34,8 @@ const Checkout3: React.FC = () => {
             try {
                 const amountOfRs = await getOrderAmount(orderId);
                 setAmount(amountOfRs);
-                setVat((amountOfRs * 10)/100);
-                setLastAmount(amountOfRs - (amountOfRs * 10)/100);
+                setVat((amountOfRs * 0.08));
+                setLastAmount(amountOfRs - (amountOfRs * 0.08));
             } catch (err) {
                 const errorMessage = err instanceof Error ? err.message : 'Failed to get amount';
                 setError(errorMessage);
@@ -47,6 +50,55 @@ const Checkout3: React.FC = () => {
         const divId = event.currentTarget.dataset.id;
         setChoicePayment(divId);
     }
+
+    const updateAmount = async (order_id:number, total_amount:number) =>{
+        try {
+            const amountOfRs = await updateTotalAmount(order_id, total_amount);
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to update amount';
+            console.log(errorMessage);
+        }
+    }
+
+    const createPayment = async () =>{
+        try {
+            const newOrderResponse = await fetch('http://localhost:8080/api/payment/create_payment/normal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amountPaid: lastAmount,
+                    paymentMethod: "CASH",
+                    paymentStatus: false,
+                    orderId: orderId,
+                    userId: 4
+                })
+            });
+        } catch (error) {
+            console.log(error, "Cannot creat payment");
+        }
+    }
+
+    const checkoutClick = async() => {
+        try {
+            if(choicePayment === "3"){
+                // const payment = new PaymentForStaffModel(
+                //     lastAmount, //amountPaid
+                //     "CASH", //paymentMethod
+                //     false, //paymentStatus
+                //     orderId, //orderId
+                //     4 //userId
+                // );
+
+                updateAmount(orderId, lastAmount);
+
+                createPayment();
+
+                alert("Thanh toán thành công!");
+            }
+        } catch (error) {
+            console.error("Cannot checkout");
+        }
+    };
 
     return(
         <div className="ps36231-checkout-staff-1">
@@ -120,7 +172,7 @@ const Checkout3: React.FC = () => {
                 </div>
             </div>
             <div className="container-button">
-                <a href="">Thanh toán</a>
+                <a style={styleOfA} onClick={checkoutClick}>Thanh toán</a>
             </div>
         </div>
         <div className="step-checkout">
