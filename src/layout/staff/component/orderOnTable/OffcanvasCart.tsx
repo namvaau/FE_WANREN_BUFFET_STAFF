@@ -54,14 +54,14 @@ const OffcanvasCart: React.FC<OffcanvasCartProps> = ({
       try {
         const response = await fetch(`http://localhost:8080/api/order_staff/findOrderIdByTableId/${tableId}`);
         if (!response.ok) throw new Error('Error fetching orderId');
-
+  
         const orderIdText = await response.text();
         const orderId = orderIdText ? Number(orderIdText) : null;
-
+  
         if (orderId) {
           const orderResponse = await fetch(`http://localhost:8080/api/order_staff/status/${orderId}`);
           if (!orderResponse.ok) throw new Error('Error fetching order details');
-
+  
           const orderData = await orderResponse.json();
           if (orderData.orderStatus === "DELIVERED") {
             await createNewOrder();
@@ -95,64 +95,15 @@ const OffcanvasCart: React.FC<OffcanvasCartProps> = ({
     };
 
     fetchOrderId().catch(console.error);
-  }, [tableId, fetchOrderDetails]);
-
-
-  // useEffect(() => {
-  //   const fetchOrderId = async () => {
-  //     const response = await fetch(`http://localhost:8080/api/order_staff/findOrderIdByTableId/${tableId}`);
-  //     if (!response.ok) throw new Error('Error fetching orderId');
-  //     const orderIdText = await response.text();
-  //     const orderId = orderIdText ? Number(orderIdText) : null;
-
-  //     if (orderId) {
-  //       const orderResponse = await fetch(`http://localhost:8080/api/order_staff/status/${orderId}`);
-  //       if (!orderResponse.ok) throw new Error('Error fetching order details');
-
-  //       const orderData = await orderResponse.json();
-  //       if (orderData.orderStatus === "DELIVERED") {
-  //         console.log(orderData.orderStatus)
-  //         const newOrderResponse = await fetch('http://localhost:8080/api/order_staff/add', {
-  //           method: 'POST',
-  //           headers: { 'Content-Type': 'application/json' },
-  //           body: JSON.stringify({
-  //             userId: 1,
-  //             address: "145 Phan Xích Long",
-  //             notes: "Order tại bàn",
-  //             orderStatus: "IN_TRANSIT",
-  //             totalAmount: 0,
-  //             tableId: Number(tableId),
-  //           }),
-  //         });
-  //         if (!newOrderResponse.ok) throw new Error('Error creating order');
-  //       } else {
-  //         fetchOrderDetails(orderId);
-  //       }
-  //     } else {
-  //       const newOrderResponse = await fetch('http://localhost:8080/api/order_staff/add', {
-  //         method: 'POST',
-  //         headers: { 'Content-Type': 'application/json' },
-  //         body: JSON.stringify({
-  //           userId: 1,
-  //           address: "145 Phan Xích Long",
-  //           notes: "Order tại bàn",
-  //           orderStatus: "IN_TRANSIT",
-  //           totalAmount: 0,
-  //           tableId: Number(tableId),
-  //         }),
-  //       });
-  //       if (!newOrderResponse.ok) throw new Error('Error creating order');
-  //     }
-  //   };
-
-  //   fetchOrderId().catch(console.error);
-  // }, [tableId, fetchOrderDetails]);
+  }, [tableId, fetchOrderDetails, creatingOrder]);
 
   useEffect(() => {
-    if (selectedItems.length > 0) {
+    if (cartItems.length > 0) {
+      setActiveTab('selecting');
+    } else if (selectedItems.length > 0) {
       setActiveTab('selected');
     }
-  }, [selectedItems]);
+  }, [cartItems, selectedItems]);
 
   useEffect(() => {
     onUpdateSubtotal(selectedItemsSubtotal);

@@ -1,6 +1,5 @@
 import React from 'react';
-import { useLocation, useParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 interface SidebarProps {
   toggleId: string;
@@ -10,8 +9,6 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ onClickContent, onOpenExitModal}) => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const { tableId } = useParams<{ tableId: string }>();
 
   const sidebarLinks = [
