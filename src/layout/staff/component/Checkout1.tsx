@@ -7,36 +7,28 @@ import OrderDetailsWithNameProduct from "../../../models/OrderDetailsWithNamePro
 const Checkout1: React.FC = () => {
     // const [orderId, setOrderId] = useState(localStorage.getItem('orderId'));
     const [orderId, setOrderId] = useState(2);
-    const [loading1, setLoading1] = useState<boolean>(true);
-    const [loading2, setLoading2] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [orderTableNum, setOrderTableNum] = useState<number>(0);
     const [orderDetails, setOrderDetails] = useState<OrderDetailsWithNameProduct[]>([]);
 
     useEffect(() => {
         const loadOrderDetails = async () => {
-            setLoading1(true);
             try {
                 const fetchedOrderDetails = await getOrderDetailWithNameProduct(orderId);
                 setOrderDetails(fetchedOrderDetails);
             } catch (err) {
                 const errorMessage = err instanceof Error ? err.message : 'Failed to fetch orderDetails';
                 setError(errorMessage);
-            } finally {
-                setLoading1(false);
             }
         };
 
         const loadTableNum = async () => {
-            setLoading2(true);
             try {
                 const fetchedTableNum = await getTableNumberByOrderId(orderId);
                 setOrderTableNum(fetchedTableNum);
             } catch (err) {
                 const errorMessage = err instanceof Error ? err.message : 'Failed to fetch tablenumber';
                 setError(errorMessage);
-            } finally {
-                setLoading2(false);
             }
         };
 
@@ -84,14 +76,14 @@ const Checkout1: React.FC = () => {
 
             </div>
             <div className="container-button">
-                <a href="">Tiếp tục</a>
+                <a href="/checkout/2">Tiếp tục</a>
             </div>
         </div>
         <div className="step-checkout">
             <div>
-                <a href="checkout_for_staff_1.html">1</a>
-                <a href="checkout_for_staff_2.html">2</a>
-                <a href="checkout_for_staff_3.html">3</a>
+                <a href="/checkout/1">1</a>
+                <a href="/checkout/2">2</a>
+                <a href="/checkout/3">3</a>
             </div>
         </div>
     </div>
