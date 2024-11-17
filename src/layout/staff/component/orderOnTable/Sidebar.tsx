@@ -1,17 +1,14 @@
 import React from 'react';
-import { useLocation, useParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 interface SidebarProps {
   toggleId: string;
-  onClickContent: (contentType: 'hotpot' | 'meat' | 'seafood' | 'meatballs' | 'vegetables' | 'noodles' | 'buffet_tickets' | 'dessert' | 'mixers' | 'cold_towel' | 'soft_drinks' | 'beer' | 'wine') => void;
+  onClickContent: (contentType: 'hotpot' | 'meat' | 'seafood' | 'meatballs' | 'vegetables' | 'noodles' | 'buffet_tickets' | 'dessert' | 'mixers' | 'cold_towel' | 'soft_drinks' | 'beer' | 'wine' | 'mushroom') => void;
   onOpenExitModal: () => void; // Thêm tham số này
   onOpenSwitchTableModal: () => void; // Thêm prop mới
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ onClickContent, onOpenExitModal}) => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const { tableId } = useParams<{ tableId: string }>();
 
   const sidebarLinks = [
@@ -20,6 +17,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClickContent, onOpenExitModal}) => 
     { label: 'Hải sản', value: 'seafood' },
     { label: 'Hàng viên', value: 'meatballs' },
     { label: 'Rau', value: 'vegetables' },
+    { label: 'Nấm', value: 'mushroom' },
     { label: 'Mỳ - Bún', value: 'noodles' },
     { label: 'Vé Buffet', value: 'buffet_tickets' },
     { label: 'Khăn lạnh', value: 'cold_towel' },
@@ -47,12 +45,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onClickContent, onOpenExitModal}) => 
             <h3 className="sidebar__title">BUFFET</h3>
             <div className="sidebar__list">
               {sidebarLinks.map(link => (
-                (link.value === 'hotpot' || link.value === 'meat' || link.value === 'seafood' || link.value === 'meatballs' || link.value === 'vegetables' || link.value === 'noodles') && (
+                (link.value === 'hotpot' || link.value === 'meat' || link.value === 'mushroom' || link.value === 'seafood' || link.value === 'meatballs' || link.value === 'vegetables' || link.value === 'noodles') && (
                   <a
                     key={link.value}
                     className="sidebar__link"
                     style={{ cursor: 'pointer' }}
-                    onClick={() => onClickContent(link.value as 'hotpot' | 'meat' | 'seafood' | 'meatballs' | 'vegetables' | 'noodles')}
+                    onClick={() => onClickContent(link.value as 'hotpot' | 'meat' | 'mushroom' | 'seafood' | 'meatballs' | 'vegetables' | 'noodles')}
                   >
                     <i className="ri-pie-chart-2-fill"></i>
                     <span>{link.label}</span>

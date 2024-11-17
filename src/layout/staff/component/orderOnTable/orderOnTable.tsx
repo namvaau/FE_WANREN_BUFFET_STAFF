@@ -21,6 +21,7 @@ type ContentType =
     | 'cold_towel'
     | 'soft_drinks'
     | 'beer'
+    | 'mushroom'
     | 'wine';
 
 const OrderOnTable: React.FC = () => {

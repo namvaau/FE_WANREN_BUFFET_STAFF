@@ -16,6 +16,7 @@ interface MainContentProps {
   | 'cold_towel'
   | 'soft_drinks'
   | 'beer'
+  | 'mushroom'
   | 'wine';
   cartItems: { product: ProductModel; quantity: number; note: string; totalPrice: number }[];
   setCartItems: React.Dispatch<
@@ -39,6 +40,7 @@ const MainContent: React.FC<MainContentProps> = ({ content, cartItems, setCartIt
       {content === 'soft_drinks' && <ProductList category={'soft_drinks'} cartItems={cartItems} setCartItems={setCartItems}/>}
       {content === 'beer' && <ProductList category={'beer'} cartItems={cartItems} setCartItems={setCartItems}/>}
       {content === 'wine' && <ProductList category={'wine'} cartItems={cartItems} setCartItems={setCartItems}/>}
+      {content === 'mushroom' && <ProductList category={'mushroom'} cartItems={cartItems} setCartItems={setCartItems}/>}
     </main>
   );
 };

@@ -25,8 +25,8 @@ const OffcanvasCart: React.FC<OffcanvasCartProps> = ({
   const selectedItemsTax = selectedItemsSubtotal * 0.08;
   const selectedItemsTotal = selectedItemsSubtotal + selectedItemsTax;
   const [activeTab, setActiveTab] = useState('selecting');
-  const [creatingOrder, setCreatingOrder] = useState(false);
-
+  const [order_id, setOrderId] = useState<any>(0);
+  
   const fetchOrderDetails = useCallback(async (orderId: number) => {
     const response = await fetch(`http://localhost:8080/api/orders_detail_staff/${orderId}`);
     if (response.ok) {
@@ -49,8 +49,6 @@ const OffcanvasCart: React.FC<OffcanvasCartProps> = ({
 
   useEffect(() => {
     const fetchOrderId = async () => {
-      if (creatingOrder) return;
-      setCreatingOrder(true);
       try {
         const response = await fetch(`http://localhost:8080/api/order_staff/findOrderIdByTableId/${tableId}`);
         if (!response.ok) throw new Error('Error fetching orderId');
@@ -58,24 +56,26 @@ const OffcanvasCart: React.FC<OffcanvasCartProps> = ({
         const orderIdText = await response.text();
         const orderId = orderIdText ? Number(orderIdText) : null;
 
+        console.log(orderId)
+
         if (orderId) {
+          setOrderId(orderId);
           const orderResponse = await fetch(`http://localhost:8080/api/order_staff/status/${orderId}`);
           if (!orderResponse.ok) throw new Error('Error fetching order details');
 
           const orderData = await orderResponse.json();
           if (orderData.orderStatus === "DELIVERED") {
             await createNewOrder();
-          } else {
-            fetchOrderDetails(orderId);
+            console.log("aaa")
           }
+          fetchOrderDetails(orderId);
         } else {
           await createNewOrder();
+          console.log("bbbb")
         }
       } catch (error) {
         console.error(error);
-      } finally {
-        setCreatingOrder(false);
-      }
+      } 
     };
 
     const createNewOrder = async () => {
@@ -95,75 +95,28 @@ const OffcanvasCart: React.FC<OffcanvasCartProps> = ({
     };
 
     fetchOrderId().catch(console.error);
-  }, [tableId, fetchOrderDetails]);
-
-
-  // useEffect(() => {
-  //   const fetchOrderId = async () => {
-  //     const response = await fetch(`http://localhost:8080/api/order_staff/findOrderIdByTableId/${tableId}`);
-  //     if (!response.ok) throw new Error('Error fetching orderId');
-  //     const orderIdText = await response.text();
-  //     const orderId = orderIdText ? Number(orderIdText) : null;
-
-  //     if (orderId) {
-  //       const orderResponse = await fetch(`http://localhost:8080/api/order_staff/status/${orderId}`);
-  //       if (!orderResponse.ok) throw new Error('Error fetching order details');
-
-  //       const orderData = await orderResponse.json();
-  //       if (orderData.orderStatus === "DELIVERED") {
-  //         console.log(orderData.orderStatus)
-  //         const newOrderResponse = await fetch('http://localhost:8080/api/order_staff/add', {
-  //           method: 'POST',
-  //           headers: { 'Content-Type': 'application/json' },
-  //           body: JSON.stringify({
-  //             userId: 1,
-  //             address: "145 Phan Xích Long",
-  //             notes: "Order tại bàn",
-  //             orderStatus: "IN_TRANSIT",
-  //             totalAmount: 0,
-  //             tableId: Number(tableId),
-  //           }),
-  //         });
-  //         if (!newOrderResponse.ok) throw new Error('Error creating order');
-  //       } else {
-  //         fetchOrderDetails(orderId);
-  //       }
-  //     } else {
-  //       const newOrderResponse = await fetch('http://localhost:8080/api/order_staff/add', {
-  //         method: 'POST',
-  //         headers: { 'Content-Type': 'application/json' },
-  //         body: JSON.stringify({
-  //           userId: 1,
-  //           address: "145 Phan Xích Long",
-  //           notes: "Order tại bàn",
-  //           orderStatus: "IN_TRANSIT",
-  //           totalAmount: 0,
-  //           tableId: Number(tableId),
-  //         }),
-  //       });
-  //       if (!newOrderResponse.ok) throw new Error('Error creating order');
-  //     }
-  //   };
-
-  //   fetchOrderId().catch(console.error);
-  // }, [tableId, fetchOrderDetails]);
+  }, []);
 
   useEffect(() => {
-    if (selectedItems.length > 0) {
+    if (cartItems.length > 0) {
+      setActiveTab('selecting');
+    } else if (selectedItems.length > 0) {
       setActiveTab('selected');
     }
-  }, [selectedItems]);
+  }, [cartItems, selectedItems]);
 
   useEffect(() => {
     onUpdateSubtotal(selectedItemsSubtotal);
   }, [selectedItemsSubtotal, onUpdateSubtotal]);
 
   const handleConfirmOrder = async () => {
+
+    console.log(selectedItemsSubtotal);
     try {
       const response = await fetch(`http://localhost:8080/api/order_staff/findOrderIdByTableId/${tableId}`);
       const orderIdText = await response.text();
       const orderId = orderIdText ? Number(orderIdText) : null;
-
+      setOrderId(orderId);
       if (!orderId) throw new Error('Order ID not found');
 
       const orderDetails = cartItems.map(item => ({
@@ -182,10 +135,10 @@ const OffcanvasCart: React.FC<OffcanvasCartProps> = ({
       });
       if (!detailsResponse.ok) throw new Error('Error adding or updating order details');
 
-      await fetch(`http://localhost:8080/api/order_staff/${tableId}`, {
+      await fetch(`http://localhost:8080/api/order_staff/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ totalAmount: selectedItemsTotal }),
+        body: JSON.stringify({ totalAmount: selectedItemsSubtotal + subtotal}),
       });
 
       await fetch(`http://localhost:8080/api/table/${tableId}`, {
@@ -318,7 +271,7 @@ const OffcanvasCart: React.FC<OffcanvasCartProps> = ({
                 </tbody>
               </table>
             </div>
-            <button style={{ float: 'right' }} className="btn btn-danger">
+            <button onClick={() => navigate(`/checkout/order/${order_id}/step1`)} style={{ float: 'right' }} className="btn btn-danger">
               Thanh Toán
             </button>
           </div>
