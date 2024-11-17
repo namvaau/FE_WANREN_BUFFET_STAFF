@@ -49,8 +49,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
                     onClick={onImageClick} // Open modal on image click
                     style={{ cursor: 'pointer' }}
                 />
-                <div className="card-body p-0">
-                    <h5 className="card-title fs-6 m-0 p-0">{product.productName}</h5>
+                <div className="card-body p-0 pt-2">
+                    <h5 className="card-title fs-6 m-0 p-0 fw-bold">{product.productName}</h5>
                 </div>
                 <div className="mt-4 mb-2 d-flex justify-content-between align-items-center">
                     <h6 className="card__price fw-bold">{product.price} đ</h6>

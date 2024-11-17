@@ -108,6 +108,25 @@ const TableList: React.FC<TableListProps> = ({ area }) => {
     return true;
   });
 
+  const handleCheckout = async (tableId: number) => {
+    try {
+      const responseOrderId = await fetch(`http://localhost:8080/api/order_staff/findOrderIdByTableId/${tableId}`);
+      if (!responseOrderId.ok) throw new Error('Error fetching orderId');
+
+      const orderIdText = await responseOrderId.text();
+      const orderId = orderIdText ? Number(orderIdText) : null;
+
+      if (orderId !== null) {
+        // Navigate to checkout page with the fetched orderId
+        navigate(`/checkout/order/${orderId}/step1`);
+      } else {
+        console.error('No orderId found for this table');
+      }
+    } catch (error) {
+      console.error('Error fetching orderId:', error);
+    }
+  };
+
   const handleTableClick = (table: Tables) => {
     if (table.tableStatus === 'EMPTY_TABLE') {
       setSelectedTable(table);
@@ -121,7 +140,7 @@ const TableList: React.FC<TableListProps> = ({ area }) => {
   const handleConfirm = (tableNumber: number, adults: number, children: number) => {
     if (tableNumber > 0 && adults > 0) { // Ensure at least one adult is selected
       console.log(`TableNumber: ${tableNumber}, Adults: ${adults}, Children: ${children}`);
-      
+
       // Navigate to the menu selection page with the table number in the URL path
       navigate(`/orderOnTable/${tableNumber}`, { state: { adults, children } });
     } else {
@@ -144,7 +163,7 @@ const TableList: React.FC<TableListProps> = ({ area }) => {
                 {table.tableStatus !== 'EMPTY_TABLE' && (
                   <>
                     <p className="table-status">2h14'</p>
-                    <p  className="btn btn-danger rounder-0 mt-4">Thanh toán</p>
+                    <p key={table.tableId} onClick={() => handleCheckout(table.tableId)} className="btn btn-danger rounder-0 mt-4">Thanh toán</p>
                   </>
                 )}
               </div>
